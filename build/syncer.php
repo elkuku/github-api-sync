@@ -17,6 +17,10 @@ class Syncer
 
 	public $ns = 'Joomla\\Github\\Package\\';
 
+	private $gitHubIgnoredClasses = [
+		'Troubleshooting', 'Changelog', 'Activity\Events\Types', 'Oauth', 'Versions', 'Media', 'Misc'
+	];
+
 	public function __construct($srcPath = 'vendor/joomla/github/src/Package', $docuPath = 'developer.github.com/content/v3')
 	{
 		$this->basePath = realpath('../');
@@ -29,6 +33,8 @@ class Syncer
 	{
 		$classes = $this->readSrcClasses();
 		$docuClasses = $this->readDocuClasses();
+
+		echo "\n\nChecking src\n\n";
 
 		foreach ($docuClasses as $docuClass)
 		{
@@ -119,7 +125,7 @@ class Syncer
 				$name = 'Data';
 			}
 
-			if (in_array($name, ['Troubleshooting', 'Changelog', 'Activity\Events\Types', 'Oauth', 'Versions', 'Media', 'Misc']))
+			if (in_array($name, $this->gitHubIgnoredClasses))
 			{
 				continue;
 			}
