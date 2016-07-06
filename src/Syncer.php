@@ -6,9 +6,13 @@
  * Time: 13:44
  */
 
+namespace Application;
+
+use Joomla\Application\AbstractCliApplication;
+
 include '../vendor/autoload.php';
 
-class Syncer
+class Syncer extends AbstractCliApplication
 {
 	public $basePath = '';
 
@@ -27,20 +31,37 @@ class Syncer
 
 		$this->srcPath = $this->basePath . '/' . $srcPath;
 		$this->docuPath = $this->basePath . '/' . $docuPath;
+
+		parent::__construct();
 	}
 
-	public function sync()
+	/**
+	 * Method to run the application routines.  Most likely you will want to instantiate a controller
+	 * and execute it, or perform some sort of task directly.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	protected function doExecute()
 	{
 		$classes = $this->readSrcClasses();
 		$docuClasses = $this->readDocuClasses();
 
-		echo "\n\nChecking src\n\n";
+		$this->out()
+			->out('*************************')
+			->out('*** GitHub API Syncer ***')
+			->out('*************************')
+			->out();
+
+		$this->out('Checking docu => src')
+			->out();
 
 		foreach ($docuClasses as $docuClass)
 		{
-			if (false === array_key_exists($docuClass, $classes))
+			if (false === array_key_exists($docuClass->name, $classes))
 			{
-				echo sprintf("** Class %s not found!\n", $docuClass);
+				echo sprintf("** Class %s not found!\n", $docuClass->name);
 
 				continue;
 			}
@@ -50,31 +71,86 @@ class Syncer
 			}
 		}
 
-		echo "\n\nChecking docu\n\n";
+		$this->out()
+			->out('Checking src => docu')
+			->out();
 
 		foreach ($classes as $class)
 		{
-			if (false === in_array($class->name, $docuClasses))
+			if (false === array_key_exists($class->name, $docuClasses))
 			{
-				echo sprintf("** Class %s not found!\n", $class->name);
+				$this->out(sprintf('*** Class %s not found! ***', $class->name))
+					->out('--------------------------------------');
 
 				continue;
 			}
 			else
 			{
-				//echo sprintf("Class %s found.\n", $class->name);
+				$this->out('Class: ' . $class->name)
+					->out();
+
+				$nfs = [];
+
+				foreach ($class->methods as $method)
+				{
+					foreach ($docuClasses[$class->name]->methods as $docuMethod)
+					{
+						if (trim($method->title, '.') == $docuMethod->title)
+						{
+							$this->out(sprintf('Found: %s()', $method->name));
+
+							continue 2;
+						}
+					}
+
+					$nfs[] = $method;
+				}
+
+				foreach ($nfs as $nf)
+				{
+					$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+				}
+
+				$this->out()
+					->out('--- Recheck docu');
+
+				$nfs = [];
+
+				foreach ($docuClasses[$class->name]->methods as $docuMethod)
+				{
+					foreach ($class->methods as $method)
+					{
+						if (trim($method->title, '.') == $docuMethod->title)
+						{
+							$this->out(sprintf('Found: %s()', $method->name));
+
+							continue 2;
+						}
+					}
+
+					$nfs[] = $docuMethod;
+				}
+
+				foreach ($nfs as $nf)
+				{
+					$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+				}
+
+				$this->out()
+					->out('--------------------------------------');
 			}
 		}
-
-		sort($classes);
-
 	}
+
+	/**
+	 * @return SyncClass[]
+	 */
 	function readSrcClasses()
 	{
 		$classes = [];
 
-		/* @type SplFileInfo $item */
-		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->srcPath)) as $item)
+		/* @type \SplFileInfo $item */
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->srcPath)) as $item)
 		{
 			if ($item->isDir())
 			{
@@ -85,13 +161,27 @@ class Syncer
 
 			$class->name = str_replace('/', '\\', str_replace([$this->srcPath . '/', '.php'], '', $item->getPathname()));
 
-			$rClass = new ReflectionClass($this->ns . $class->name);
+			$rClass = new \ReflectionClass($this->ns . $class->name);
 
 			$class->comment = $rClass->getDocComment();
 
 			foreach ($rClass->getMethods() as $method)
 			{
-				$a = $method->getDocComment();
+				if (in_array($method->getName(), ['__construct', '__get', 'fetchUrl', 'processResponse']))
+				{
+					continue;
+				}
+
+				$m = new SyncMethod;
+
+				$m->name = $method->getName();
+				$m->docComment = $method->getDocComment();
+
+				$lines = explode("\n", $m->docComment);
+
+				$m->title = trim(str_replace('* ', '', $lines[1]));
+
+				$class->addMethod($m);
 			}
 
 			$classes[$class->name] = $class;
@@ -100,12 +190,15 @@ class Syncer
 		return $classes;
 	}
 
+	/**
+	 * @return SyncClass[]
+	 */
 	function readDocuClasses()
 	{
 		$classes = [];
 
-		/* @type SplFileInfo $item */
-		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->docuPath)) as $item)
+		/* @type \SplFileInfo $item */
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->docuPath)) as $item)
 		{
 			if ($item->isDir())
 			{
@@ -130,11 +223,32 @@ class Syncer
 				continue;
 			}
 
-			$classes[] = $name;
+			$class = new SyncClass;
+
+			$lines = file($item->getPathname());
+
+			foreach ($lines as $line)
+			{
+				if (0 === strpos($line, '## '))
+				{
+					$method = new SyncMethod;
+
+					$method->title = trim(substr($line, 3));
+
+					$method->title = str_replace('\'', '’', $method->title);
+
+					$class->addMethod($method);
+				}
+			}
+
+			$class->name = $name;
+
+			$classes[$class->name] = $class;
 		}
 
 		return $classes;
 	}
+
 }
 
 
@@ -148,11 +262,22 @@ class SyncClass
 	public $name = '';
 
 	public $comment = '';
+
+	public function addMethod(SyncMethod $method)
+	{
+		$this->methods[] = $method;
+
+		return $this;
+	}
 }
 
 class SyncMethod
 {
+	public $name = '';
 
+	public $title = '';
+
+	public $docComment = '';
 }
 
 /*
@@ -160,4 +285,4 @@ class SyncMethod
  */
 
 (new Syncer)
-	->sync();
+	->execute();
