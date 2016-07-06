@@ -1,9 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: elkuku
- * Date: 05.07.16
- * Time: 13:44
+ * Joomla! GitHub API syncer.
+ *
+ * @copyright  Copyright (C) 2016 Nikolai Plath - elkuku.
+ * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
 namespace Application;
@@ -12,11 +12,17 @@ use Joomla\Application\AbstractCliApplication;
 
 include '../vendor/autoload.php';
 
+/**
+ * Class Syncer
+ *
+ * @since  1
+ */
 class Syncer extends AbstractCliApplication
 {
 	public $basePath = '';
 
 	public $docuPath = '';
+
 	public $srcPath = '';
 
 	public $ns = 'Joomla\\Github\\Package\\';
@@ -25,6 +31,12 @@ class Syncer extends AbstractCliApplication
 		'Troubleshooting', 'Changelog', 'Activity\Events\Types', 'Oauth', 'Versions', 'Media', 'Misc'
 	];
 
+	/**
+	 * Syncer constructor.
+	 *
+	 * @param   string  $srcPath   The src path.
+	 * @param   string  $docuPath  The docu path.
+	 */
 	public function __construct($srcPath = 'vendor/joomla/github/src/Package', $docuPath = 'developer.github.com/content/v3')
 	{
 		$this->basePath = realpath('../');
@@ -67,7 +79,7 @@ class Syncer extends AbstractCliApplication
 			}
 			else
 			{
-				//echo sprintf("Class %s found!\n", $docuClass);
+				// @echo sprintf("Class %s found!\n", $docuClass);
 			}
 		}
 
@@ -143,9 +155,11 @@ class Syncer extends AbstractCliApplication
 	}
 
 	/**
+	 * Read src classes.
+	 *
 	 * @return SyncClass[]
 	 */
-	function readSrcClasses()
+	private function readSrcClasses()
 	{
 		$classes = [];
 
@@ -191,9 +205,11 @@ class Syncer extends AbstractCliApplication
 	}
 
 	/**
+	 * Read docu classes.
+	 *
 	 * @return SyncClass[]
 	 */
-	function readDocuClasses()
+	private function readDocuClasses()
 	{
 		$classes = [];
 
@@ -248,10 +264,13 @@ class Syncer extends AbstractCliApplication
 
 		return $classes;
 	}
-
 }
 
-
+/**
+ * Class SyncClass
+ *
+ * @since  1
+ */
 class SyncClass
 {
 	/**
@@ -263,6 +282,13 @@ class SyncClass
 
 	public $comment = '';
 
+	/**
+	 * Add a method.
+	 *
+	 * @param   SyncMethod  $method  The method to add.
+	 *
+	 * @return $this
+	 */
 	public function addMethod(SyncMethod $method)
 	{
 		$this->methods[] = $method;
@@ -271,6 +297,11 @@ class SyncClass
 	}
 }
 
+/**
+ * Class SyncMethod
+ *
+ * @since  1
+ */
 class SyncMethod
 {
 	public $name = '';
