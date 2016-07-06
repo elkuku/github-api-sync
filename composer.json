@@ -1,0 +1,12 @@
+{
+    "name": "elkuku/github-api-sync",
+    "authors": [
+        {
+            "name": "Nikolai Plath",
+            "email": "der.el.kuku@gmail.com"
+        }
+    ],
+    "require": {
+        "joomla/github": "dev-master"
+    }
+}
