@@ -7,6 +7,7 @@
         }
     ],
     "require": {
-        "joomla/github": "dev-master"
+        "joomla/github": "dev-master",
+        "joomla/application": "1.6.0"
     }
 }
