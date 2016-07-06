@@ -96,61 +96,59 @@ class Syncer extends AbstractCliApplication
 
 				continue;
 			}
-			else
+
+			$this->out('Class: ' . $class->name)
+				->out();
+
+			$nfs = [];
+
+			foreach ($class->methods as $method)
 			{
-				$this->out('Class: ' . $class->name)
-					->out();
-
-				$nfs = [];
-
-				foreach ($class->methods as $method)
-				{
-					foreach ($docuClasses[$class->name]->methods as $docuMethod)
-					{
-						if (trim($method->title, '.') == $docuMethod->title)
-						{
-							$this->out(sprintf('Found: %s()', $method->name));
-
-							continue 2;
-						}
-					}
-
-					$nfs[] = $method;
-				}
-
-				foreach ($nfs as $nf)
-				{
-					$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
-				}
-
-				$this->out()
-					->out('--- Recheck docu');
-
-				$nfs = [];
-
 				foreach ($docuClasses[$class->name]->methods as $docuMethod)
 				{
-					foreach ($class->methods as $method)
+					if (trim($method->title, '.') == $docuMethod->title)
 					{
-						if (trim($method->title, '.') == $docuMethod->title)
-						{
-							$this->out(sprintf('Found: %s()', $method->name));
+						$this->out(sprintf('Found: %s()', $method->name));
 
-							continue 2;
-						}
+						continue 2;
 					}
-
-					$nfs[] = $docuMethod;
 				}
 
-				foreach ($nfs as $nf)
-				{
-					$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
-				}
-
-				$this->out()
-					->out('--------------------------------------');
+				$nfs[] = $method;
 			}
+
+			foreach ($nfs as $nf)
+			{
+				$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+			}
+
+			$this->out()
+				->out('--- Recheck docu');
+
+			$nfs = [];
+
+			foreach ($docuClasses[$class->name]->methods as $docuMethod)
+			{
+				foreach ($class->methods as $method)
+				{
+					if (trim($method->title, '.') == $docuMethod->title)
+					{
+						$this->out(sprintf('Found: %s()', $method->name));
+
+						continue 2;
+					}
+				}
+
+				$nfs[] = $docuMethod;
+			}
+
+			foreach ($nfs as $nf)
+			{
+				$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+			}
+
+			$this->out()
+				->out('--------------------------------------');
 		}
 	}
 
