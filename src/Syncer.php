@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * Joomla! GitHub API syncer.
@@ -31,6 +32,8 @@ class Syncer extends AbstractCliApplication
 		'Troubleshooting', 'Changelog', 'Activity\Events\Types', 'Oauth', 'Versions', 'Media', 'Misc'
 	];
 
+	private $quiet = false;
+
 	/**
 	 * Syncer constructor.
 	 *
@@ -57,6 +60,8 @@ class Syncer extends AbstractCliApplication
 	 */
 	protected function doExecute()
 	{
+		$this->quiet = $this->input->get('quiet', $this->input->get('q'));
+
 		$classes = $this->readSrcClasses();
 		$docuClasses = $this->readDocuClasses();
 
@@ -97,8 +102,7 @@ class Syncer extends AbstractCliApplication
 				continue;
 			}
 
-			$this->out('Class: ' . $class->name)
-				->out();
+			$this->out('Class: ' . $class->name);
 
 			$nfs = [];
 
@@ -108,7 +112,10 @@ class Syncer extends AbstractCliApplication
 				{
 					if (trim($method->title, '.') == $docuMethod->title)
 					{
-						$this->out(sprintf('Found: %s()', $method->name));
+						if (!$this->quiet)
+						{
+							$this->out(sprintf('Found: %s()', $method->name));
+						}
 
 						continue 2;
 					}
@@ -119,13 +126,13 @@ class Syncer extends AbstractCliApplication
 
 			foreach ($nfs as $nf)
 			{
-				$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+				$this->out(sprintf("** Undocumented: %s()\n%s", $nf->name, $nf->title));
 			}
 
 			$this->out()
-				->out('--- Recheck docu');
+				->out('--- Docu');
 
-			$nfs = [];
+			$nfs1 = [];
 
 			foreach ($docuClasses[$class->name]->methods as $docuMethod)
 			{
@@ -133,22 +140,31 @@ class Syncer extends AbstractCliApplication
 				{
 					if (trim($method->title, '.') == $docuMethod->title)
 					{
-						$this->out(sprintf('Found: %s()', $method->name));
+						if (!$this->quiet)
+						{
+							$this->out(sprintf('Found: %s()', $method->name));
+						}
 
 						continue 2;
 					}
 				}
 
-				$nfs[] = $docuMethod;
+				$nfs1[] = $docuMethod;
 			}
 
-			foreach ($nfs as $nf)
+			foreach ($nfs1 as $nf)
 			{
-				$this->out(sprintf("** Not Found: %s()\n%s", $nf->name, $nf->title));
+				$this->out('** Missing method for: ' . $nf->title);
 			}
 
-			$this->out()
-				->out('--------------------------------------');
+			$this->out();
+
+			if (!$nfs && !$nfs1)
+			{
+				$this->out('OK');
+			}
+
+			$this->out('--------------------------------------');
 		}
 	}
 
@@ -172,6 +188,18 @@ class Syncer extends AbstractCliApplication
 			$class = new SyncClass;
 
 			$class->name = str_replace('/', '\\', str_replace([$this->srcPath . '/', '.php'], '', $item->getPathname()));
+
+			include $item->getPathname();
+
+			if (false == class_exists($this->ns . $class->name))
+			{
+				$u = $item->getPathname();
+				include $item->getPathname();
+			}
+			else
+			{
+				//throw new \RuntimeException('class exists'.$this->ns . $class->name);
+			}
 
 			$rClass = new \ReflectionClass($this->ns . $class->name);
 
@@ -248,6 +276,11 @@ class Syncer extends AbstractCliApplication
 					$method = new SyncMethod;
 
 					$method->title = trim(substr($line, 3));
+
+					if (in_array($method->title, ['Custom media types']))
+					{
+						continue;
+					}
 
 					$method->title = str_replace('\'', '’', $method->title);
 
