@@ -235,23 +235,23 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/joomla-framework/github-api.git",
-                "reference": "3a74d3017dff2d90c3bc6ffbe9927845a0dae2c6"
+                "reference": "dc8b8384f4c6691c41163f69090bc80a84082780"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joomla-framework/github-api/zipball/3a74d3017dff2d90c3bc6ffbe9927845a0dae2c6",
-                "reference": "3a74d3017dff2d90c3bc6ffbe9927845a0dae2c6",
+                "url": "https://api.github.com/repos/joomla-framework/github-api/zipball/dc8b8384f4c6691c41163f69090bc80a84082780",
+                "reference": "dc8b8384f4c6691c41163f69090bc80a84082780",
                 "shasum": ""
             },
             "require": {
                 "joomla/date": "~1.0",
-                "joomla/http": "~1.0",
+                "joomla/http": "^1.2.2",
                 "joomla/registry": "~1.0",
                 "joomla/uri": "~1.0",
                 "php": ">=5.3.10|>=7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.8|~5.0",
+                "phpunit/phpunit": "~4.8|>=5.0 <5.4",
                 "squizlabs/php_codesniffer": "1.*"
             },
             "type": "joomla-package",
@@ -276,7 +276,7 @@
                 "github",
                 "joomla"
             ],
-            "time": "2016-04-03 16:33:30"
+            "time": "2016-07-08 16:45:42"
         },
         {
             "name": "joomla/http",
