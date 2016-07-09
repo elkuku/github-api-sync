@@ -1,13 +1,12 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: elkuku
- * Date: 09.07.16
- * Time: 13:49
+ * Joomla! GitHub API syncer.
+ *
+ * @copyright  Copyright (C) 2016 Nikolai Plath - elkuku.
+ * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
 namespace ElKuKu\Syncer;
-
 
 use ElKuKu\Syncer\Reader\DocumentationReader;
 use ElKuKu\Syncer\Reader\SourceCodeReader;
@@ -21,8 +20,6 @@ use Joomla\Application\AbstractCliApplication;
  */
 class Application extends AbstractCliApplication
 {
-	public $basePath = '';
-
 	public $docuPath = '';
 
 	public $srcPath = '';
@@ -35,12 +32,10 @@ class Application extends AbstractCliApplication
 	 * @param   string  $srcPath   The src path.
 	 * @param   string  $docuPath  The docu path.
 	 */
-	public function __construct($srcPath = 'vendor/joomla/github/src/Package', $docuPath = 'developer.github.com/content/v3')
+	public function __construct($srcPath = '', $docuPath = '')
 	{
-		$this->basePath = realpath('../');
-
-		$this->srcPath = $this->basePath . '/' . $srcPath;
-		$this->docuPath = $this->basePath . '/' . $docuPath;
+		$this->srcPath = $srcPath ? : realpath('../' . 'vendor/joomla/github/src/Package');
+		$this->docuPath = $docuPath ? : realpath('../' . 'developer.github.com/content/v3');
 
 		parent::__construct();
 	}

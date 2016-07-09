@@ -1,4 +1,10 @@
 <?php
+/**
+ * Joomla! GitHub API syncer.
+ *
+ * @copyright  Copyright (C) 2016 Nikolai Plath - elkuku.
+ * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
+ */
 
 namespace ElKuKu\Syncer\Reader;
 
@@ -7,10 +13,9 @@ use ElKuKu\Syncer\Type\SyncMethod;
 use ElKuKu\Syncer\Type\SyncParameter;
 
 /**
- * Created by PhpStorm.
- * User: elkuku
- * Date: 09.07.16
- * Time: 14:58
+ * Class SourceCodeReader
+ *
+ * @since  1
  */
 class SourceCodeReader extends AbstractReader
 {

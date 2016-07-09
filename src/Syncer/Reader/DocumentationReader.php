@@ -1,9 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: elkuku
- * Date: 09.07.16
- * Time: 14:59
+ * Joomla! GitHub API syncer.
+ *
+ * @copyright  Copyright (C) 2016 Nikolai Plath - elkuku.
+ * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
 namespace ElKuKu\Syncer\Reader;
@@ -12,6 +12,11 @@ use ElKuKu\Syncer\Type\SyncClass;
 use ElKuKu\Syncer\Type\SyncMethod;
 use ElKuKu\Syncer\Type\SyncParameter;
 
+/**
+ * Class DocumentationReader
+ *
+ * @since  1
+ */
 class DocumentationReader extends AbstractReader
 {
 	private $gitHubIgnoredClasses = [

@@ -1,9 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: elkuku
- * Date: 09.07.16
- * Time: 13:42
+ * Joomla! GitHub API syncer.
+ *
+ * @copyright  Copyright (C) 2016 Nikolai Plath - elkuku.
+ * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
 namespace ElKuKu\Syncer\Type;
